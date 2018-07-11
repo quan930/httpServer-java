@@ -1,26 +1,28 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
+//无需更改
 public class HttpServer {
+    private int prot;//端口号
+    private String context;//环境
+    private HttpExchange httpExchange;//当前线程
+    private Response response;
 
-    public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket= new ServerSocket(7002);
-        Socket server = serverSocket.accept();
-        String message = null;
-
-        Scanner in = new Scanner(server.getInputStream());
-
-        while ((message=in.nextLine())!=null){
-            System.out.println(message);
+    public void start() throws IOException {
+        ServerSocket serverSocket = new ServerSocket(prot);
+        Socket socket=null;//客户端套接字
+        while(true){
+            socket = serverSocket.accept();
+            httpExchange = new HttpExchange(socket,context,response);
+            new Thread(httpExchange).start();
         }
-        System.out.printf("登录");
-        in.close();
-        server.close();
-        serverSocket.close();
+    };
+    public HttpServer (int prot,String context){
+        this.prot = prot;
+        this.context = context;
+    }
+    public void response(Response response){
+        this.response = response;
     }
 }

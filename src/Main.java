@@ -1,4 +1,3 @@
-import com.sun.corba.se.spi.activation.Server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -21,8 +20,8 @@ public class Main {
                 arg0.getResponseBody().write("Hello world!!!".getBytes());
                 arg0.getResponseBody().flush();
                 arg0.getResponseBody().close();
-                System.out.println("books.....");
 
+                System.out.println("books.....");
             }
         });
         System.out.println(server.getClass().getName());
