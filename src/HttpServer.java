@@ -8,21 +8,26 @@ public class HttpServer {
     private String context;//环境
     private HttpExchange httpExchange;//当前线程
     private Response response;
+    private RequestMessageBody requestMessageBody;
+
+    public HttpServer (int prot,String context){
+        this.prot = prot;
+        this.context = context;
+    }
 
     public void start() throws IOException {
         ServerSocket serverSocket = new ServerSocket(prot);
         Socket socket=null;//客户端套接字
         while(true){
             socket = serverSocket.accept();
-            httpExchange = new HttpExchange(socket,context,response);
+            httpExchange = new HttpExchange(socket,context,response,requestMessageBody);
             new Thread(httpExchange).start();
         }
     };
-    public HttpServer (int prot,String context){
-        this.prot = prot;
-        this.context = context;
-    }
-    public void response(Response response){
+    public void setResponse(Response response){//实现响应接口
         this.response = response;
+    }
+    public void setRequestMessageBody(RequestMessageBody requestMessageBody) {//实现请求报文接口
+        this.requestMessageBody = requestMessageBody;
     }
 }
