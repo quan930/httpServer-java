@@ -8,7 +8,6 @@ public class HttpServer {
     private String context;//环境
     private HttpExchange httpExchange;//当前线程
     private Response response;
-    private RequestMessageBody requestMessageBody;
 
     public HttpServer (int prot,String context){
         this.prot = prot;
@@ -20,14 +19,11 @@ public class HttpServer {
         Socket socket=null;//客户端套接字
         while(true){
             socket = serverSocket.accept();
-            httpExchange = new HttpExchange(socket,context,response,requestMessageBody);
+            httpExchange = new HttpExchange(socket,context,response);
             new Thread(httpExchange).start();
         }
     };
     public void setResponse(Response response){//实现响应接口
         this.response = response;
-    }
-    public void setRequestMessageBody(RequestMessageBody requestMessageBody) {//实现请求报文接口
-        this.requestMessageBody = requestMessageBody;
     }
 }

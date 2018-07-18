@@ -7,17 +7,15 @@ public class HttpExchange implements Runnable{
     private Socket socket;
     private String context;//上下文
     private Response response;//响应接口实现
-    private RequestMessageBody requestMessageBody;//请求报文接口实现
     private Request request;
     private byte body[];
-    private StringBuilder responseHeaders = new StringBuilder();
+    private StringBuilder responseHeaders = new StringBuilder();//响应头
     private File file;
 
-    public HttpExchange (Socket socket,String context,Response response,RequestMessageBody requestMessageBody){
+    public HttpExchange (Socket socket, String context, Response response){
         this.socket = socket;
         this.context = context;//所设置的上下文
         this.response = response;
-        this.requestMessageBody = requestMessageBody;
     }
 
     public void sendResponseHeaders(String fieldName,String fieldValue){//发送响应字段
@@ -44,32 +42,20 @@ public class HttpExchange implements Runnable{
     }
 
     private void request() throws IOException {
-        request = new Request(socket.getInputStream(),requestMessageBody);
-        request.readRequest();
-        //请求行请求头读取完毕
-        response.response(this);
-        responseMessage();
-        request.requestBody();//请求报文主体
+        request = new Request(socket.getInputStream());
+        request.init();//请求报文
+        response.response(this);//接口方法
+        responseMessage();//响应报文
     }
 
     private void responseMessage() throws IOException {//响应报文
-        File fileo = new File(request.getRequestContext());
-        if(fileo.isFile()){
-//            System.out.println("有文件");
-            socket.getOutputStream().write("HTTP/1.0 200 OK\r\n".getBytes());
-            socket.getOutputStream().write("Content-Type: image/png".getBytes());
-            String s = "Content-Length:"+fileo.length()+"\r\n\r\n";
-            socket.getOutputStream().write(s.getBytes());
-
-            InputStream fileIn = new FileInputStream(fileo);
-            int n = -1;
-            while ((n=fileIn.read())!=-1){
-                socket.getOutputStream().write(n);
-            }
-            socket.getOutputStream().flush();
+        ResponseMessage responseMessage = new ResponseMessage(socket.getOutputStream());
+        File fileo = new File(new File("").getAbsolutePath()+request.getRequestContext());
+        boolean fileYOrN = responseMessage.responseFile(fileo);
+        if(fileYOrN){
             return;
         }
-        ResponseMessage responseMessage = new ResponseMessage(socket.getOutputStream());
+
         if (this.context.equals(request.getRequestContext())){//200
             if (file!=null){
                 responseMessage.responseOK(responseHeaders.toString(),file);
@@ -91,5 +77,9 @@ public class HttpExchange implements Runnable{
 
     public String getRequestContext(){
         return request.getRequestContext();
+    }
+
+    public String getRequestMessageBody() {
+        return request.getRequestMessageBody();
     }
 }

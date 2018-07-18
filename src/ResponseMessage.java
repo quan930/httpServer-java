@@ -7,7 +7,30 @@ public class ResponseMessage {//发送响应报文
         this.outputStream = outputStream;
     }
 
-    //"test".equals(object);
+    public boolean responseFile(File file) throws IOException {//请求文件，true为成功
+        if(file.isFile()){
+//            System.out.println("有文件");
+//            System.out.println(file.getName().substring(file.getName().lastIndexOf(".") + 1));
+            outputStream.write("HTTP/1.0 200 OK\r\n".getBytes());
+            String a = "Content-Type: "+file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            outputStream.write(a.getBytes());
+            String s = "Content-Length:"+file.length()+"\r\n\r\n";
+            outputStream.write(s.getBytes());
+
+            int n = -1;
+            InputStream fileIn = new BufferedInputStream(new FileInputStream(file));
+            while((n=fileIn.read())!=-1){
+                outputStream.write(n);
+            }
+
+            outputStream.flush();
+            outputStream.close();
+            return true;
+        }
+        return false;
+    }
+
+
     public void responseOK(String responseHeaders,byte body[]){
         try {
             outputStream.write("HTTP/1.0 200 OK\r\n".getBytes());
@@ -38,7 +61,7 @@ public class ResponseMessage {//发送响应报文
         }
     }
 
-    public void responseNotFound(){
+    public void responseNotFound(){//404错误
         try {
             outputStream.write("HTTP/1.0 404 Not Found\r\n".getBytes());
             Date date = new Date();
